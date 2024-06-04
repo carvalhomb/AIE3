@@ -1,0 +1,14 @@
+name: aie3-course
+channels: 
+  - conda-forge
+dependencies: 
+  - python=3.11
+  - pip
+  - pip: 
+    - numpy
+    - pandas
+    - matplotlib
+    - jupyter
+    - openai
+    - huggingface_hub 
+    - python-dotenv  
