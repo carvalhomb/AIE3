@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from collections import defaultdict
 from typing import List, Tuple, Callable
 from aimakerspace.openai_utils.embedding import EmbeddingModel
@@ -40,7 +41,7 @@ class EnhancedVectorDatabase():
         # If we want cosine distance, we need to get the euclidean distance and then
         # calculate the cosine
         if self.distance_measure == 'cosine':
-            distance_measure = 'euclidean'
+            distance_measure = 'angular'
         else:
             distance_measure = self.distance_measure
 
@@ -68,13 +69,17 @@ class EnhancedVectorDatabase():
             include_distances=True,
         )
 
-        if self.distance_measure == 'cosine':
-            distance_measure = 'euclidean'
-        else:
-            distance_measure = self.distance_measure
 
         if indices is not None:
-            return [(self.keys[i], d) for i, d in zip(indices[0], indices[1])]
+            result_indices = indices[0]
+            result_distances = indices[1]
+
+            if self.distance_measure == 'cosine':
+                # We convert the angular distance into cosine similarity with the formula (angular^2)/2 
+                # source: https://github.com/spotify/annoy/issues/530
+                result_distances = [ ( 1-(math.pow(a,2)/2)) for a in result_distances]
+
+            return [(self.keys[i], d) for i, d in zip(result_indices, result_distances)]
         else:
             return None
 
