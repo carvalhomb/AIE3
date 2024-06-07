@@ -4,20 +4,28 @@ from collections import defaultdict
 from typing import List, Tuple, Callable
 from aimakerspace.openai_utils.embedding import EmbeddingModel
 import asyncio
-import annoy
-
-
-from aimakerspace.vectordatabase import cosine_similarity
+import annoy  # Use annoy library from Spotify
 
 
 class EnhancedVectorDatabase():
     """Extends VectorDatabase, so that searching the vector database is done with ANN
         using Spotify's annoy package
     """
-    def __init__(self, embedding_model: EmbeddingModel = None, search_in_x_trees=None, distance_measure='cosine'):
+    def __init__(self, 
+        embedding_model: EmbeddingModel = None, 
+        search_in_x_trees=None, 
+        distance_measure='cosine'
+    ):
         #self.vectors = defaultdict(np.array)
         self.embedding_model = embedding_model or EmbeddingModel()
-        self.distance_measure = distance_measure
+
+        # Make sure that the distance measure is supported
+        if distance_measure in ["angular", "euclidean", "manhattan", "hamming", "dot", "cosine"]:
+            self.distance_measure = distance_measure
+        else:
+            raise ValueError('Measure distance not supported!')
+
+
         self.vectors = []
         self.keys = []        
         self.index = None
@@ -28,15 +36,17 @@ class EnhancedVectorDatabase():
             
 
     def insert(self, key: str, vector: np.array) -> None:
+        """Add a key: vector pair to the class"""
         self.vectors.append(vector)
         self.keys.append(key)
 
+
     def build_index(self, number_of_trees=5):
+        """Function to build the index before being able to search anything."""
         try:
             dimensions = self.vectors[0].shape[0]
         except Exception as e:
             raise ValueError('Cannot determine the number of dimensions! Did you add any vectors with insert()?')
-
         
         # If we want cosine distance, we need to get the euclidean distance and then
         # calculate the cosine
