@@ -2,3 +2,5 @@ wandb/
 .env
 __pycache__/
 .ipynb*
+**/Week\ 2/Day\ 2/datasets
+**/Week\ 2/Day\ 2/paul_graham*
