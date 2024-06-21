@@ -40,7 +40,7 @@ HF_TOKEN = os.environ["HF_TOKEN"]
 ### 1. CREATE TEXT LOADER AND LOAD DOCUMENTS
 ### NOTE: PAY ATTENTION TO THE PATH THEY ARE IN. 
 text_loader = TextLoader("./paul-graham-to-kindle/paul_graham_essays.txt")
-documents = document_loader.load()
+documents = text_loader.load()
 
 ### 2. CREATE TEXT SPLITTER AND SPLIT DOCUMENTS
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=30)
