@@ -39,7 +39,7 @@ HF_TOKEN = os.environ["HF_TOKEN"]
 """
 ### 1. CREATE TEXT LOADER AND LOAD DOCUMENTS
 ### NOTE: PAY ATTENTION TO THE PATH THEY ARE IN. 
-text_loader = TextLoader("./paul-graham-to-kindle/paul_graham_essays.txt")
+text_loader = TextLoader("./data/paul_graham_essays.txt")
 documents = text_loader.load()
 
 ### 2. CREATE TEXT SPLITTER AND SPLIT DOCUMENTS
@@ -53,7 +53,7 @@ hf_embeddings = HuggingFaceEndpointEmbeddings(
     huggingfacehub_api_token=os.environ["HF_TOKEN"],
 )
 
-if os.path.exists("./data/vectorstore"):
+if os.path.exists("./data/vectorstore/index.faiss"):
     vectorstore = FAISS.load_local(
         "./data/vectorstore", 
         hf_embeddings, 
@@ -65,7 +65,13 @@ else:
     print("Indexing Files")
     os.makedirs("./data/vectorstore", exist_ok=True)
     ### 4. INDEX FILES
-    ### NOTE: REMEMBER TO BATCH THE DOCUMENTS WITH MAXIMUM BATCH SIZE = 32
+    ### NOTE: REMEMBER TO BATCH THE DOCUMENTS WITH MAXIMUM BATCH SIZE = 32    
+
+    for i in range(0, len(split_documents), 32):
+        if i == 0:
+            vectorstore = FAISS.from_documents(split_documents[i:i+32], hf_embeddings)
+            continue
+        vectorstore.add_documents(split_documents[i:i+32])
 
 hf_retriever = vectorstore.as_retriever()
 
